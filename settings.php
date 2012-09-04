@@ -40,8 +40,6 @@ if ($ADMIN->fulltree) {
     $options = ldap_supported_usertypes();
     $settings->add(new admin_setting_configselect('enrol_ldap/user_type', get_string('user_type_key', 'enrol_ldap'), get_string('user_type', 'enrol_ldap'), 'default', $options));
  
-	$settings->add(new admin_setting_configcheckbox('enrol_ldapuserrel/handlemultiplevalue', get_string('handlemultiplevalue_key', 'enrol_ldapuserrel'), get_string('handlemultiplevalue', 'enrol_ldapuserrel'), 0));
-	
 	$settings->add(new admin_setting_configtext_trim_lower('enrol_ldapuserrel/idnumber_attribute', get_string('idnumber_attribute_key', 'enrol_ldapuserrel'), get_string('idnumber_attribute', 'enrol_ldapuserrel'), '', true, true));
 	
 	//--- Role mapping settings matrix ---

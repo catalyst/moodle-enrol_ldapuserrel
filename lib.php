@@ -93,7 +93,7 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
         if (!enrol_is_enabled('ldapuserrel')) {
             return true;
         }
-        if (!$this->get_config('dbtype') or !$this->get_config('dbhost') or !$this->get_config('remoteenroltable') or !$this->get_config('remotecoursefield') or !$this->get_config('remoteuserfield')) {
+        if (!$this->get_config('host_url') or !$this->get_config('idnumber_attribute') or !$this->get_config('filter') ) {
             return true;
         }
 
@@ -129,7 +129,7 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 	function setup_enrolments($verbose = false) {
 		global $CFG, $DB;
 
-		mtrace('Starting LDAP user role assignment synchronisation...');
+		mtrace('Starting LDAP user role assignment synchronization...');
 
 		if ($verbose) {
 			mtrace("Calling ldap_connect()");
@@ -145,9 +145,8 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 		raise_memory_limit(MEMORY_HUGE);
 
 		// Store the field values in some shorter variable names to ease reading of the code.
-		$flocalsubject  = strtolower($this->get_config('localsubjectuserfield'));
-		$flocalobject   = strtolower($this->get_config('localobjectuserfield'));
-		$flocalrole     = strtolower($this->get_config('localrolefield'));
+		$flocalsubject  = strtolower($this->get_config('localsubjectuserfield')); // Mentor
+		$flocalobject   = strtolower($this->get_config('localobjectuserfield')); // Mentee
 
 		// Unique identifier of the role assignment
 		$uniqfield = $DB->sql_concat("r.id", "'|'", "u1.$flocalsubject", "'|'", "u2.$flocalobject");
@@ -198,8 +197,6 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 
 			// Define the search pattern
 			$ldap_search_pattern = $this->config->filter;
-			// DEBUG
-			$ldap_search_pattern = "(cn=p88*)";
 
 			if ($verbose) {
 				mtrace("Filter : ".$ldap_search_pattern);
@@ -248,10 +245,7 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 				if (count($flat_records)) {
 					$subjectusers = array(); // cache of mapping of localsubjectuserfield to mdl_user.id (for get_context_instance)
 					$objectusers = array(); // cache of mapping of localsubjectuserfield to mdl_user.id (for get_context_instance)
-					$contexts = array(); // cache
 
-					$rels = array();
-				
 					// We loop through all the records of the remote table
 					foreach($flat_records as $mentor) {
 						$mentor_idnumber = $mentor{$this->config->idnumber_attribute}[0];						
@@ -389,7 +383,4 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
             unset($this->ldapconnection);
         }
     }
-
 } // end of class
-
-
