@@ -6,7 +6,11 @@
  *
  * @package    enrol
  * @subpackage ldapuserrel
- * @copyright  Maxime Pelletier <maxime.pelletier@educsa.org>
+ * @author     Maxime Pelletier - based on code by Penny Leach, Iñaki Arenaza, Martin Dougiamas, Martin Langhoff and others
+ * @copyright  1999 onwards Martin Dougiamas {@link http://moodle.com}
+ * @copyright  2007 Penny Leach <penny@catalyst.net.nz>
+ * @copyright  2010 Iñaki Arenaza <iarenaza@eps.mondragon.edu>
+ * @copyright  2012 Maxime Pelletier <maxime.pelletier@educsa.org>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

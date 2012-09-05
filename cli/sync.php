@@ -13,8 +13,10 @@
  *
  * @package    enrol
  * @subpackage ldapuserrel
+ * @author     Maxime Pelletier - based on code by Penny Leach, Petr Skoda and others
+ * @copyright  2012 Maxime Pelletier <maxime.pelletier@educsa.org>
  * @copyright  2010 Petr Skoda {@link http://skodak.org}
- * @copyright  Maxime Pelletier <maxime.pelletier@educsa.org>
+ * @copyright  2007 Penny Leach <penny@catalyst.net.nz>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define('CLI_SCRIPT', true);
