@@ -11,6 +11,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($ADMIN->fulltree) {
+	// Import classe from enrol/ldap plugin for role matrix
 	require_once($CFG->dirroot.'/enrol/ldap/settingslib.php');
 	require_once($CFG->libdir.'/ldaplib.php');
 	$yesno = array(get_string('no'), get_string('yes'));
@@ -37,8 +38,8 @@ if ($ADMIN->fulltree) {
 	
 	$settings->add(new admin_setting_configtext_trim_lower('enrol_ldapuserrel/filter', get_string('filter_key', 'enrol_ldapuserrel'), get_string('filter', 'enrol_ldapuserrel'), ''));
 
-    $options = ldap_supported_usertypes();
-    $settings->add(new admin_setting_configselect('enrol_ldap/user_type', get_string('user_type_key', 'enrol_ldap'), get_string('user_type', 'enrol_ldap'), 'default', $options));
+    	$options = ldap_supported_usertypes();
+    	$settings->add(new admin_setting_configselect('enrol_ldap/user_type', get_string('user_type_key', 'enrol_ldap'), get_string('user_type', 'enrol_ldap'), 'default', $options));
  
 	$settings->add(new admin_setting_configtext_trim_lower('enrol_ldapuserrel/idnumber_attribute', get_string('idnumber_attribute_key', 'enrol_ldapuserrel'), get_string('idnumber_attribute', 'enrol_ldapuserrel'), '', true, true));
 	
@@ -53,7 +54,5 @@ if ($ADMIN->fulltree) {
 
 	$settings->add(new admin_setting_configtext('enrol_ldapuserrel/localsubjectuserfield', get_string('localsubjectuserfield', 'enrol_ldapuserrel'), get_string('localsubjectuserfield_desc', 'enrol_ldapuserrel'), 'username'));
 
-	$settings->add(new admin_setting_configtext('enrol_ldapuserrel/localobjectuserfield', get_string('localobjectuserfield', 'enrol_ldapuserrel'), get_string('localobjectuserfield_desc', 'enrol_ldapuserrel'), 'username'));		
-
-	$settings->add(new admin_setting_configtext('enrol_ldapuserrel/localrolefield', get_string('localrolefield', 'enrol_ldapuserrel'), get_string('localrolefield_desc', 'enrol_ldapuserrel'), 'shortname'));	
+	$settings->add(new admin_setting_configtext('enrol_ldapuserrel/localobjectuserfield', get_string('localobjectuserfield', 'enrol_ldapuserrel'), get_string('localobjectuserfield_desc', 'enrol_ldapuserrel'), 'username'));
 }

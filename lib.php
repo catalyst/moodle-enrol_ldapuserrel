@@ -124,11 +124,11 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 
 	/*
 	 * MAIN FUNCTION
-	 * For the given user, let's go out and look in an external database
+	 * Let's go out and look in LDAP
 	 * for an authoritative list of relationships, and then adjust the
 	 * local Moodle assignments to match.
 	 * @param bool $verbose
-	 * @return int 0 means success, 1 db connect failure, 2 db read failure
+	 * @return int 0 means success, 1 ldap connect failure
 	 */
 	function setup_enrolments($verbose = false) {
 		global $CFG, $DB;
@@ -141,7 +141,7 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 		$ldapconnection = $this->ldap_connect();
 		if (!$ldapconnection) {
 			mtrace('Error: [ENROL_ldapuserrel] Could not make a connection to LDAP');
-			return;
+			return 1;
 		}
 
 		// we may need a lot of memory here
@@ -149,17 +149,17 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 		raise_memory_limit(MEMORY_HUGE);
 
 		// Store the field values in some shorter variable names to ease reading of the code.
-		$flocalsubject  = strtolower($this->get_config('localsubjectuserfield')); // Mentor
-		$flocalobject   = strtolower($this->get_config('localobjectuserfield')); // Mentee
+		$flocalmentor  = strtolower($this->get_config('localsubjectuserfield')); // Mentor
+		$flocalmentee   = strtolower($this->get_config('localobjectuserfield')); // Mentee
 
 		// Unique identifier of the role assignment
-		$uniqfield = $DB->sql_concat("r.id", "'|'", "u1.$flocalsubject", "'|'", "u2.$flocalobject");
+		$uniqfield = $DB->sql_concat("r.id", "'|'", "u1.$flocalmentor", "'|'", "u2.$flocalmentee");
 				
 		// Query to retreive all user role assignment from Moodle
 		$sql = "SELECT $uniqfield AS uniq,
 			ra.*, r.id ,
-			u1.{$flocalsubject} AS subjectid,
-			u2.{$flocalobject} AS objectid
+			u1.{$flocalmentor} AS subjectid,
+			u2.{$flocalmentee} AS objectid
 			FROM {role_assignments} ra
 			JOIN {role} r ON ra.roleid = r.id
 			JOIN {context} c ON c.id = ra.contextid
@@ -178,7 +178,7 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 			mtrace(sizeof($existing)." role assignement entries from ldapuserrel found in Moodle DB");
 		}
 		
-		// Get enrolments for each type of role.
+		// Get enrolments for each user role.
 		$roles = get_roles_for_contextlevels(CONTEXT_USER);
 		if ($verbose) {
 			mtrace(sizeof($roles)." user roles found in Moodle DB");
@@ -189,14 +189,13 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 			// Find role name
 			$rolename = $DB->get_field('role', 'name', array('id' => $role) );
 
-			// Get all contexts
+			// Get all LDAP contexts for that role
 			$ldap_contexts = explode(';', $this->config->{'contexts_role'.$role});
 
-			// Get all the fields we will want for the potential course creation
-			// as they are light. Don't get membership -- potentially a lot of data.
+			// Get all the fields we will want for the potential role assignment
 			$ldap_fields_wanted = array('dn', $this->config->idnumber_attribute);
 
-			// Add the field containing the list of user for the given role
+			// Add the field containing the list of mentee for the given role
 			array_push($ldap_fields_wanted, $this->config->{'memberattribute_role'.$role});
 
 			// Define the search pattern
@@ -208,6 +207,7 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 				//print_r($ldap_fields_wanted);
 			}
 
+			// Loop through all LDAP contexts specified for the current role
 			foreach ($ldap_contexts as $ldap_context) {
 				$ldap_context = trim($ldap_context);
 				if (empty($ldap_context)) {
@@ -228,7 +228,7 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 											  $ldap_fields_wanted);
 				}
 				if (!$ldap_result) {
-					mtrace('Warning: [ENROL_ldapuserrel] Couldn\'t get entries from LDAP -- no relationships to assign');
+					mtrace('Warning: [ENROL_ldapuserrel] Couldn\'t get entries from LDAP for role '.$rolename.' and context '.$ldap_context.'-- no relationships to assign');
 					continue; // Next
 				}
 			
@@ -247,10 +247,10 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 
 				// Is there something in LDAP?
 				if (count($flat_records)) {
-					$subjectusers = array(); // cache of mapping of localsubjectuserfield to mdl_user.id (for get_context_instance)
-					$objectusers = array(); // cache of mapping of localsubjectuserfield to mdl_user.id (for get_context_instance)
+					$mentorusers = array(); // cache of mapping of mentors to mdl_user.id (for get_context_instance)
+					$menteeusers = array(); // cache of mapping of mentees to mdl_user.id (for get_context_instance)
 
-					// We loop through all the records of the remote table
+					// We loop through all the records found in LDAP
 					foreach($flat_records as $mentor) {
 						$mentor_idnumber = $mentor{$this->config->idnumber_attribute}[0];						
 
@@ -267,6 +267,7 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 							continue;
 						}
 
+						// Loop through all mentee of the mentor
 						for ( $i=0; $i < (sizeof($mentor{$this->config->{'memberattribute_role'.$role}})-1);$i++ ) {
 							$mentee = $mentor{$this->config->{'memberattribute_role'.$role}}[$i];
 							$key = $role . '|' . $mentor_idnumber . '|' . $mentee;
@@ -285,37 +286,34 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 								continue;
 							}
 
-										
-							// Fill the subject array
-							if (!array_key_exists($mentor_idnumber, $subjectusers)) {
-								$subjectusers[$mentor_idnumber] = $DB->get_field('user', 'id', array($flocalsubject => $mentor_idnumber) );
+							// Fill the mentor userid cache array
+							if (!array_key_exists($mentor_idnumber, $mentorusers)) {
+								$mentorusers[$mentor_idnumber] = $DB->get_field('user', 'id', array($flocalmentor => $mentor_idnumber) );
 							}	
 						
-							// Check if subject exist in Moodle
-							if ($subjectusers[$mentor_idnumber] == false) {
-								mtrace("--> Warning: [" . $mentor_idnumber . "] couldn't find subject user -- skipping $key");
+							// Check if mentor exist in Moodle
+							if ($mentorusers[$mentor_idnumber] == false) {
+								mtrace("--> Warning: [" . $mentor_idnumber . "] couldn't find mentor user in Moodle -- skipping $key");
 								// couldn't find user, skip
 								continue;
 							}
 
-							// Fill the object array
-							if (!array_key_exists($mentee, $objectusers)) {
-								$objectusers[$mentee] = $DB->get_field('user', 'id', array($flocalobject => $mentee) );
+							// Fill the mentee userid cache array
+							if (!array_key_exists($mentee, $menteeusers)) {
+								$menteeusers[$mentee] = $DB->get_field('user', 'id', array($flocalmentee => $mentee) );
 							}
 						
-							// Check if object exist in Moodle
-							if ($objectusers[$mentee] == false) {
+							// Check if mentee exist in Moodle
+							if ($menteeusers[$mentee] == false) {
 								// couldn't find user, skip
-								mtrace("--> Warning: [" . $mentee . "] couldn't find object user --  skipping $key");
+								mtrace("--> Warning: [" . $mentee . "] couldn't find mentee user in Moodle --  skipping $key");
 								continue;
 							}
 						
-							// Get the context of the object
-							$context = get_context_instance(CONTEXT_USER, $objectusers[$mentee]);
+							// Get the context of the mentee
+							$context = get_context_instance(CONTEXT_USER, $menteeusers[$mentee]);
 							mtrace("----> Information: [" . $mentor_idnumber . "] assigning role " . $rolename . " to " . $mentor_idnumber . " on " . $mentee);
-							// MOODLE 1.X => role_assign($roles[$row->{$fremoterole}]->id, $subjectusers[$row->{$fremotesubject}], 0, $context->id, 0, 0, 0, 'ldapuserrel');
-							// MOODLE 2.X => role_assign($roleid, $userid, $contextid, $component = '', $itemid = 0, $timemodified = '') 
-							role_assign($role, $subjectusers[$mentor_idnumber], $context->id, 'enrol_ldapuserrel', 0, '');
+							role_assign($role, $mentorusers[$mentor_idnumber], $context->id, 'enrol_ldapuserrel', 0, '');
 						}
 					}
 				}
@@ -325,7 +323,6 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 				foreach ($existing as $key => $assignment) {
 					if ($assignment->component == 'enrol_ldapuserrel') {
 						mtrace("Information: [$key] unassigning $key");
-						// MOODLE 1.X => role_unassign($assignment->roleid, $assignment->userid, 0, $assignment->contextid);
 						role_unassign($assignment->roleid, $assignment->userid, $assignment->contextid, 'enrol_ldapuserrel', 0);
 					}
 				}
@@ -339,7 +336,7 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 		mtrace('Execution completed normally...');
 	}
 	
-	    /**
+    /**
      * Connect to the LDAP server, using the plugin configured
      * settings. It's actually a wrapper around ldap_connect_moodle()
      *
