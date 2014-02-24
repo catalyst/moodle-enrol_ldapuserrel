@@ -10,9 +10,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2012090600;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->version   = 2014022400;        // The current plugin version (Date: YYYYMMDDXX)
 $plugin->requires  = 2012061700;        // Requires this Moodle version
-$plugin->release   = '0.1';
+$plugin->release   = '0.2';
 $plugin->component = 'enrol_ldapuserrel';  // Full name of the plugin (used for diagnostics)
 $plugin->dependencies = array('enrol_ldap' => 2012061700); // We need the setting matrix (settingslib.php file)
 $plugin->maturity  = MATURITY_BETA;
