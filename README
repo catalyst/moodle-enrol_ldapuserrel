@@ -1,10 +1,10 @@
 This plugin allows you to configure automatic relationships between users from LDAP
 
-THIS PLUGIN IS IN BETA STATUS! BE CAREFULL WITH PRODUCTION ENVIRONMENT!
+THIS PLUGIN HAS BEEN USED FOR MORE THAN A YEAR BUT BE CAREFULL WITH PRODUCTION ENVIRONMENT!
 
 Users familiar with enrol/ldap should have no problems configuring this.
 
-Plugin has been tested on 2.3.
+Plugin has been tested on 2.6.1.
 
 This plugin is the LDAP version of a plugin that was first developed by Penny Leach <penny@catalyst.net.nz> for Moodle 1.9
 but I modified it to work with Moodle 2.3
