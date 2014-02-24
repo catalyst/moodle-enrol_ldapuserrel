@@ -311,7 +311,8 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 							}
 						
 							// Get the context of the mentee
-							$context = get_context_instance(CONTEXT_USER, $menteeusers[$mentee]);
+							//$context = get_context_instance(CONTEXT_USER, $menteeusers[$mentee]);
+							$context = context_user::instance($menteeusers[$mentee]);
 							mtrace("----> Information: [" . $mentor_idnumber . "] assigning role " . $rolename . " to " . $mentor_idnumber . " on " . $mentee);
 							role_assign($role, $mentorusers[$mentor_idnumber], $context->id, 'enrol_ldapuserrel', 0, '');
 						}
