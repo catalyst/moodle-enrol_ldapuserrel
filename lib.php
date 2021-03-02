@@ -252,14 +252,15 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 
 					// We loop through all the records found in LDAP
 					foreach($flat_records as $mentor) {
-						$mentor_idnumber = $mentor{$this->config->idnumber_attribute}[0];						
+						$mentor_idnumber = $mentor[$this->config->idnumber_attribute][0];
 
 						if ($verbose) {
 							mtrace("Mentor LDAP entry:".$mentor_idnumber);
 							//print_r($mentor);
 						}
-						
-						if ( !isset($mentor{$this->config->{'memberattribute_role'.$role}}) ) {
+
+                        $attributerole = 'memberattribute_role'.$role;
+						if ( !isset($mentor[$this->config->$attributerole]) ) {
 							// No children set, we skip this entry
 							if ($verbose) {
 								mtrace("--> No mentee for ".$mentor_idnumber);
@@ -268,8 +269,8 @@ class enrol_ldapuserrel_plugin extends enrol_plugin {
 						}
 
 						// Loop through all mentee of the mentor
-						for ( $i=0; $i < (sizeof($mentor{$this->config->{'memberattribute_role'.$role}})-1);$i++ ) {
-							$mentee = $mentor{$this->config->{'memberattribute_role'.$role}}[$i];
+						for ( $i=0; $i < (sizeof($mentor[$this->config->$attributerole])-1);$i++ ) {
+							$mentee = $mentor[$this->config->$attributerole][$i];
 							$key = $role . '|' . $mentor_idnumber . '|' . $mentee;
 
 							if ($verbose) {
