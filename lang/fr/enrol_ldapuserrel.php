@@ -18,6 +18,7 @@ $string['localsubjectuserfield_desc'] = 'Nom du champs dans la table utilisateur
 $string['localobjectuserfield_desc'] = 'Nom du champs dans la table utilisateur de Moodle utilise pour identifier l\'eleve specifie dans la BD externe';
 $string['pluginname'] = 'Affectation de role utilisateur LDAP';
 $string['pluginname_desc'] = 'Vous pouvez utiliser LDAP pour controler les roles entre utilisateurs. LDAP doit contenir un champs avec des noms d\'utilisateur. Ces valeurs sont compares avec les champs de Moodle que vous choisissez.';
+$string['privacy:metadata'] = 'Affectation de role utilisateur LDAP ne stocke aucune donnée personnelle.';
 $string['remote_fields_mapping'] = 'Association des champs LDAP';
 $string['role_mapping'] = '<p>Pour chaque role que vous voulez assigner a partir de LDAP, vous devez entrer une liste de contexte contenant de detail des roles a assigner. Separez plusieurs contextes avec \';\'.</p><p>Vous devez aussi entrer le nom de l\'attribut qui contient la liste des identifiants des mentore.</p>';
 $string['role_mapping_key'] = 'Map roles from LDAP';

@@ -18,6 +18,7 @@ $string['localsubjectuserfield_desc'] = 'Name of the field in Moodle user table 
 $string['localobjectuserfield_desc'] = 'Name of the field in Moodle user table that is used to identify the mentee';
 $string['pluginname'] = 'LDAP User role assignment';
 $string['pluginname_desc'] = 'You can use LDAP to control your mentor role. It is assumed your LDAP contains at least a field containing a mentee username in mentor entry. These are compared against fields that you choose in the local user tables.';
+$string['privacy:metadata'] = 'The LDAP User role assignment does not store any personal data.';
 $string['remote_fields_mapping'] = 'LDAP remote field mapping';
 $string['role_mapping'] = '<p>For each role that you want to assign from LDAP, you need to specify the list of contexts where the mentors are located. Separate different contexts with \';\'.</p><p>You also need to specify the attribute your LDAP server uses to hold the list of mentees.</p>';
 $string['role_mapping_key'] = 'Map roles from LDAP ';
